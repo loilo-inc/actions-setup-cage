@@ -1265,7 +1265,8 @@ function downloadCage({ version }) {
         const zip = yield tc.downloadTool(url);
         const extracted = yield tc.extractZip(zip);
         const installed = yield tc.cacheDir(extracted, "cage", version);
-        console.log(`🐣 cage has been installed at '${installed}'`);
+        core.addPath(installed);
+        console.log(`🐣 cage has been installed at '${installed}/cage'`);
     });
 }
 exports.downloadCage = downloadCage;
