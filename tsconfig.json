@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2015",
-    "outDir": "lib"
+    "outDir": "dist"
   },
   "files": ["index.ts"]
 }
