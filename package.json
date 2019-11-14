@@ -1,7 +1,6 @@
 {
   "name": "setup-cage",
   "version": "1.0.0",
-  "main": "lib/index.js",
   "author": "keroxp <kerokerokerop@gmail.com>",
   "license": "MIT",
   "jest": {
