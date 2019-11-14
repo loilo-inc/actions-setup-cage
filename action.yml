@@ -4,7 +4,7 @@ author: 'LoiLo'
 inputs:
   cage-version:
     description: 'Cage version'
-    default: '3.3.1'
+    default: '3.1.1'
     required: false
   cage-prefix:
     description: 'Prefix for cage installation path. Must not be end with /'
