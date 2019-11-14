@@ -1,0 +1,15 @@
+{
+  "name": "setup-cage",
+  "version": "1.0.0",
+  "main": "lib/index.js",
+  "author": "keroxp <kerokerokerop@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@actions/tool-cache": "^1.1.2"
+  },
+  "devDependencies": {
+    "prettier": "^1.19.1",
+    "typescript": "^3.7.2"
+  }
+}

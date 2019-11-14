@@ -1,0 +1,15 @@
+name: 'Setup Canarycage'
+description: 'Download and add cage to the PATH'
+author: 'LoiLo'
+inputs:
+  cage-version:
+    description: 'Cage version'
+    default: '3.3.1'
+    required: false
+  cage-prefix:
+    description: 'Prefix for cage installation path. Must not be end with /'
+    default: '/usr/bin'
+    required: false
+runs:
+  using: 'node12'
+  main: 'lib/index.js'
