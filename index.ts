@@ -7,8 +7,9 @@ export async function downloadCage({ version }: { version: string }) {
   const zip = await tc.downloadTool(url);
   const extracted = await tc.extractZip(zip);
   const installed = await tc.cacheDir(extracted, "cage", version);
+  core.addPath(installed);
   console.log(
-    `🐣 cage has been installed at '${installed}'`
+    `🐣 cage has been installed at '${installed}/cage'`
   );
 }
 
