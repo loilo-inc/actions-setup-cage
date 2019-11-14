@@ -3,11 +3,15 @@
   "version": "1.0.0",
   "author": "keroxp <kerokerokerop@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "test": "jest --forceExit"
+  },
   "jest": {
     "preset": "ts-jest"
   },
   "dependencies": {
     "@actions/core": "^1.2.0",
+    "@actions/io": "^1.0.1",
     "@actions/tool-cache": "^1.1.2",
     "@types/download": "^6.2.4",
     "@zeit/ncc": "^0.20.5",

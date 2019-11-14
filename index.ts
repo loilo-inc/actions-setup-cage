@@ -1,35 +1,21 @@
 import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
-import { mkdtempSync, renameSync } from "fs";
-import * as download from "download";
 
-export async function downloadCage({
-  version,
-  prefix
-}: {
-  version: string;
-  prefix: string;
-}) {
+export async function downloadCage({ version }: { version: string }) {
   console.log("🥚 Installing cage...");
   const url = `https://s3-us-west-2.amazonaws.com/loilo-public/oss/canarycage/${version}/canarycage_linux_amd64.zip`;
-  const dir = mkdtempSync("cage_");
-  await download(url, dir);
-  const cageDest = `${prefix}/cage`;
-  const cwd = process.cwd();
-  process.chdir(dir);
-  await tc.extractZip(`canarycage_linux_amd64.zip`, ".");
-  process.chdir(cwd);
-  await renameSync(`${dir}/cage`, cageDest);
+  const zip = await tc.downloadTool(url);
+  const extracted = await tc.extractZip(zip);
+  const installed = await tc.cacheDir(extracted, "cage", version);
   console.log(
-    `🐣 cage has been installed at '${cageDest}'. Ensure it included in your $PATH`
+    `🐣 cage has been installed at '${installed}'`
   );
 }
 
 async function main() {
   try {
     const version = core.getInput("cage-version");
-    const prefix = core.getInput("cage-prefix");
-    await downloadCage({ version, prefix });
+    await downloadCage({ version });
   } catch (error) {
     core.setFailed(error.message);
   }
