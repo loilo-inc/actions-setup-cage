@@ -10,7 +10,7 @@
     "preset": "ts-jest"
   },
   "dependencies": {
-    "@actions/core": "^1.2.0",
+    "@actions/core": "^1.2.6",
     "@actions/io": "^1.0.1",
     "@actions/tool-cache": "^1.1.2",
     "@types/download": "^6.2.4",
