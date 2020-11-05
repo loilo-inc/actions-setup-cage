@@ -3,14 +3,12 @@ import * as tc from "@actions/tool-cache";
 
 export async function downloadCage({ version }: { version: string }) {
   console.log("🥚 Installing cage...");
-  const url = `https://s3-us-west-2.amazonaws.com/loilo-public/oss/canarycage/${version}/canarycage_linux_amd64.zip`;
+  const url = `https://github.com/loilo-inc/canarycage/releases/download/${version}/canarycage_linux_amd64.zip`
   const zip = await tc.downloadTool(url);
   const extracted = await tc.extractZip(zip);
   const installed = await tc.cacheDir(extracted, "cage", version);
   core.addPath(installed);
-  console.log(
-    `🐣 cage has been installed at '${installed}/cage'`
-  );
+  console.log(`🐣 cage has been installed at '${installed}/cage'`);
 }
 
 async function main() {

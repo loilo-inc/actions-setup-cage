@@ -9,5 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: loilo-inc/actions-setup-cage@v1.0.0
+      - uses: loilo-inc/actions-setup-cage@v2.0.0
+        with:
+          cage-version: 3.4.0
 ```
