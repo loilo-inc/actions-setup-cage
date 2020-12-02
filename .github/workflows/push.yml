@@ -1,0 +1,16 @@
+name: CI
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "14"
+      - run: yarn install
+      - name: Check lib
+        run: |
+          make
+          git diff --exit-code
+      - run: yarn test

@@ -1,3 +1,2 @@
-dist/index.js: index.ts package.json yarn.lock
-	yarn tsc
-	yarn ncc build dist/index.js
+lib/index.js: index.ts src/setup.ts package.json yarn.lock
+	yarn ncc build index.ts -o lib
