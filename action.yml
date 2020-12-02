@@ -3,9 +3,8 @@ description: 'Download and add cage to the PATH'
 author: 'LoiLo'
 inputs:
   cage-version:
-    description: 'Cage version'
-    default: '3.4.0'
+    description: "Canarycage version. If no version specified, the latest version will be used automatically."
     required: false
 runs:
   using: 'node12'
-  main: 'dist/index.js'
+  main: 'lib/index.js'

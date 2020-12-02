@@ -2,7 +2,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2015",
-    "outDir": "dist"
-  },
-  "files": ["index.ts"]
+    "outDir": "dist",
+    "strict": true,
+    "strictNullChecks": true
+  }
 }
