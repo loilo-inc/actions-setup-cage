@@ -15,8 +15,11 @@ async function main() {
     if (!(await io.which("cage", false))) {
       await downloadCage({version});
     }
-  } catch (error) {
-    core.setFailed(error.message);
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error(e);
+    }
+    core.setFailed('see error above');
   }
 }
 
