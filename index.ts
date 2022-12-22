@@ -3,9 +3,10 @@ import * as io from "@actions/io"
 import {downloadCage, getLatestVersion} from "./src/setup";
 
 async function main() {
+  const token = core.getInput("github-token");
   try {
     let version = core.getInput("cage-version");
-    const latestVersion = await getLatestVersion()
+    const latestVersion = await getLatestVersion(token)
     if (!version) {
       version = latestVersion
       core.info(`No version specified. Using latest version: ${version}`)
