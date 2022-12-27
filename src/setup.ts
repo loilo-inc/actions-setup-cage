@@ -1,7 +1,6 @@
 import {getOctokit} from "@actions/github";
 import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
-import fetch from "node-fetch"
 
 type Release = {
   tag_name: string;
