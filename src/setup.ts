@@ -9,17 +9,9 @@ type Release = {
 
 export async function getLatestVersion(token: string) {
   const url = "https://api.github.com/repos/loilo-inc/canarycage/releases";
-  if (token == "") {
-    const res = await fetch(url);
-    return parseBody(res.status, await res.json());
-  } else {
-    const res = await getOctokit(token).request(`GET ${url}`);
-    return parseBody(res.status, await res.data);
-  }
-}
-
-function parseBody(status: number, list: Release[]) {
-  if (status == 200) {
+  const res = await getOctokit(token).request(`GET ${url}`);
+  if (res.status == 200) {
+    const list: Release[] = await res.data
     const regex = /^(\d+)\.(\d+)\.(\d+)$/;
     const versions = list
       .map((v) => v.tag_name)
@@ -27,7 +19,7 @@ function parseBody(status: number, list: Release[]) {
       .sort((a, b) => b.localeCompare(a));
     return versions[0];
   } else {
-    throw new Error(`Could not fetch versions: status=${status}`);
+    throw new Error(`Could not fetch versions: status=${res.status}`);
   }
 }
 

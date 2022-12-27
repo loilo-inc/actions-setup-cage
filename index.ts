@@ -2,9 +2,17 @@ import * as core from "@actions/core";
 import * as io from "@actions/io"
 import {downloadCage, getLatestVersion} from "./src/setup";
 
+function assertInput(name: string): string {
+  const v = core.getInput(name);
+  if (!v) {
+    throw new Error(`${name} is required`);
+  }
+  return v;
+}
+
 async function main() {
-  const token = core.getInput("github-token");
   try {
+    const token = assertInput("github-token");
     let version = core.getInput("cage-version");
     const latestVersion = await getLatestVersion(token)
     if (!version) {

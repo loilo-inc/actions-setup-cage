@@ -3,6 +3,8 @@ Github Actions to setup [canarycage](https://github.com/loilo-inc/canarycage)
 
 ## Usage
 
+`github-token` is required.
+
 ```yml
 jobs:
   build:
@@ -10,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: loilo-inc/actions-setup-cage@{version}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 
@@ -23,17 +27,6 @@ If you need to set specified version of cage, add `cage-version` param.
 ```yaml
       - uses: loilo-inc/actions-setup-cage@{version}
         with:
-          cage-version: 3.4.2
-```
-
-### If status 403?
-
-It may be [Rate limiting](https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limiting) by GitHub REST API
-
-Use of `GITHUB_TOKEN` is recommended.
-
-```yml
-      - uses: loilo-inc/actions-setup-cage@{version}
-        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          cage-version: 3.4.2
 ```
