@@ -3,6 +3,8 @@ Github Actions to setup [canarycage](https://github.com/loilo-inc/canarycage)
 
 ## Usage
 
+`github-token` is required.
+
 ```yml
 jobs:
   build:
@@ -10,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: loilo-inc/actions-setup-cage@{version}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 
@@ -23,5 +27,6 @@ If you need to set specified version of cage, add `cage-version` param.
 ```yaml
       - uses: loilo-inc/actions-setup-cage@{version}
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           cage-version: 3.4.2
 ```
