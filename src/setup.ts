@@ -7,8 +7,7 @@ type Release = {
 };
 
 export async function getLatestVersion(token: string) {
-  const url = "https://api.github.com/repos/loilo-inc/canarycage/releases";
-  const res = await getOctokit(token).request(`GET ${url}`);
+  const res = await getOctokit(token).rest.repos.listReleases({owner: "loilo-inc", repo: "canarycage"})
   if (res.status == 200) {
     const list: Release[] = await res.data
     const regex = /^(\d+)\.(\d+)\.(\d+)$/;
