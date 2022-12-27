@@ -12,14 +12,12 @@
     "@actions/core": "^1.2.6",
     "@actions/github": "^5.1.1",
     "@actions/io": "^1.0.2",
-    "@actions/tool-cache": "^1.6.0",
-    "node-fetch": "^2.6.1"
+    "@actions/tool-cache": "^1.6.0"
   },
   "devDependencies": {
     "@types/download": "^6.2.4",
     "@types/jest": "^26.0.15",
     "@types/node": "^16",
-    "@types/node-fetch": "^2",
     "@vercel/ncc": "^0",
     "jest": "^27.0.6",
     "nock": "^13.0.5",
