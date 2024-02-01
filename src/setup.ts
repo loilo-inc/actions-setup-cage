@@ -1,4 +1,4 @@
-import {getOctokit} from "@actions/github";
+import { getOctokit } from "@actions/github";
 import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
 
@@ -7,9 +7,12 @@ type Release = {
 };
 
 export async function getLatestVersion(token: string) {
-  const res = await getOctokit(token).rest.repos.listReleases({owner: "loilo-inc", repo: "canarycage"})
+  const res = await getOctokit(token).rest.repos.listReleases({
+    owner: "loilo-inc",
+    repo: "canarycage",
+  });
   if (res.status == 200) {
-    const list: Release[] = await res.data
+    const list: Release[] = await res.data;
     const regex = /^(\d+)\.(\d+)\.(\d+)$/;
     const versions = list
       .map((v) => v.tag_name)
@@ -21,9 +24,9 @@ export async function getLatestVersion(token: string) {
   }
 }
 
-export async function downloadCage({version}: { version: string }) {
+export async function downloadCage({ version }: { version: string }) {
   console.log("🥚 Installing cage...");
-  const url = `https://github.com/loilo-inc/canarycage/releases/download/${version}/canarycage_linux_amd64.zip`
+  const url = `https://github.com/loilo-inc/canarycage/releases/download/${version}/canarycage_linux_amd64.zip`;
   const zip = await tc.downloadTool(url);
   const extracted = await tc.extractZip(zip);
   const installed = await tc.cacheDir(extracted, "cage", version);
