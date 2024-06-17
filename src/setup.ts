@@ -1,10 +1,9 @@
 import { getOctokit } from "@actions/github";
 import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
-
-type Release = {
-  tag_name: string;
-};
+import os from "node:os";
+import fs from "node:fs/promises";
+import crypto from "node:crypto";
 
 export async function getLatestVersion(token: string) {
   const res = await getOctokit(token).rest.repos.listReleases({
@@ -12,7 +11,7 @@ export async function getLatestVersion(token: string) {
     repo: "canarycage",
   });
   if (res.status == 200) {
-    const list: Release[] = await res.data;
+    const list = res.data;
     const regex = /^(\d+)\.(\d+)\.(\d+)$/;
     const versions = list
       .map((v) => v.tag_name)
@@ -24,12 +23,83 @@ export async function getLatestVersion(token: string) {
   }
 }
 
-export async function downloadCage({ version }: { version: string }) {
+export async function downloadCage({
+  version,
+  token,
+}: {
+  token: string;
+  version: string;
+}) {
   console.log("🥚 Installing cage...");
-  const url = `https://github.com/loilo-inc/canarycage/releases/download/${version}/canarycage_linux_amd64.zip`;
-  const zip = await tc.downloadTool(url);
+  const gh = getOctokit(token);
+  const platformArch = getPlatformArch();
+  const list = await gh.rest.repos.listReleases({
+    owner: "loilo-inc",
+    repo: "canarycage",
+  });
+  const release = list.data.find((release) => release.tag_name === version);
+  if (!release) throw new Error(`Version ${version} not found`);
+  const asset = release.assets.find(
+    (asset) => asset.name === `canarycage_${platformArch}.zip`,
+  );
+  const checksums = release.assets.find(
+    (asset) => asset.name === `canarycage_${version}_checksums.txt`,
+  );
+  if (!checksums) throw new Error(`Checksums not found for ${version}`);
+  if (!asset) throw new Error(`Asset not found for ${platformArch}`);
+  console.assert(
+    asset.url.startsWith("https://github.com/"),
+    "asset.url is not valid: %s",
+    asset.url,
+  );
+  console.assert(
+    checksums.url.startsWith("https://github.com/"),
+    "checksums.url is not valid: %s",
+    checksums.url,
+  );
+  const checksumsContent = await tc.downloadTool(checksums.url);
+  const checksumEntries = await parseChecksum(checksumsContent);
+  const hash = checksumEntries.get(asset.name);
+  if (!hash) throw new Error(`Checksum not found for ${asset.name}`);
+  const zip = await tc.downloadTool(asset.url);
+  const zipFile = await fs.open(zip, "r");
+  const zipHash = await sha256hashAsync(zipFile.createReadStream());
+  if (zipHash !== hash) {
+    throw new Error(`Checksum mismatch: expected=${hash}, actual=${zipHash}`);
+  }
   const extracted = await tc.extractZip(zip);
   const installed = await tc.cacheDir(extracted, "cage", version);
   core.addPath(installed);
   console.log(`🐣 cage has been installed at '${installed}/cage'`);
+}
+
+function getPlatformArch(): string {
+  const platform = os.platform();
+  let arch = os.arch();
+  if (arch === "x64") {
+    arch = "amd64";
+  }
+  return `${platform}_${arch}`;
+}
+
+async function parseChecksum(file: string): Promise<Map<string, string>> {
+  const buf = await fs.readFile(file, "utf-8");
+  const entries: [string, string][] = buf
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [hash, filename] = line.split("  ");
+      return [filename, hash];
+    });
+  return new Map(entries);
+}
+
+async function sha256hashAsync(stream: NodeJS.ReadableStream): Promise<string> {
+  return await new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    hash.on("finish", () => resolve(hash.digest("hex")));
+    hash.on("error", reject);
+    stream.pipe(hash);
+  });
 }

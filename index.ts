@@ -24,7 +24,7 @@ async function main() {
       );
     }
     if (!(await io.which("cage", false))) {
-      await downloadCage({ version });
+      await downloadCage({ version, token });
     }
   } catch (e) {
     if (e instanceof Error) {

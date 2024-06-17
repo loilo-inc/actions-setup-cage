@@ -4,14 +4,14 @@
   "license": "MIT",
   "scripts": {
     "fmt": "prettier --write '**/*.ts'",
-    "test": "jest --forceExit"
+    "test": "jest"
   },
   "jest": {
     "preset": "ts-jest"
   },
   "dependencies": {
     "@actions/core": "^1.2.6",
-    "@actions/github": "^5.1.1",
+    "@actions/github": "^5",
     "@actions/io": "^1.0.2",
     "@actions/tool-cache": "^2"
   },

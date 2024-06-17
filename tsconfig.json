@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2015",
+    "module": "CommonJS",
+    "target": "es2022",
     "outDir": "dist",
     "strict": true,
-    "strictNullChecks": true
+    "esModuleInterop": true
   }
 }
