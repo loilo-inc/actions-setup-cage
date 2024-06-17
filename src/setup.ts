@@ -32,8 +32,7 @@ export async function downloadCage({
 }) {
   console.log("🥚 Installing cage...");
   const gh = getOctokit(token);
-  const platform = os.platform();
-  const arch = os.arch();
+  const platformArch = getPlatformArch();
   const list = await gh.rest.repos.listReleases({
     owner: "loilo-inc",
     repo: "canarycage",
@@ -41,13 +40,13 @@ export async function downloadCage({
   const release = list.data.find((release) => release.tag_name === version);
   if (!release) throw new Error(`Version ${version} not found`);
   const asset = release.assets.find(
-    (asset) => asset.name === `canarycage_${platform}_${arch}.zip`,
+    (asset) => asset.name === `canarycage_${platformArch}.zip`,
   );
   const checksums = release.assets.find(
     (asset) => asset.name === `canarycage_${version}_checksums.txt`,
   );
   if (!checksums) throw new Error(`Checksums not found for ${version}`);
-  if (!asset) throw new Error(`Asset not found for ${platform}_${arch}`);
+  if (!asset) throw new Error(`Asset not found for ${platformArch}`);
   console.assert(
     asset.url.startsWith("https://github.com/"),
     "asset.url is not valid: %s",
@@ -72,6 +71,15 @@ export async function downloadCage({
   const installed = await tc.cacheDir(extracted, "cage", version);
   core.addPath(installed);
   console.log(`🐣 cage has been installed at '${installed}/cage'`);
+}
+
+function getPlatformArch(): string {
+  const platform = os.platform();
+  let arch = os.arch();
+  if (arch === "x64") {
+    arch = "amd64";
+  }
+  return `${platform}_${arch}`;
 }
 
 async function parseChecksum(file: string): Promise<Map<string, string>> {
