@@ -94,6 +94,7 @@ export async function parseChecksum(
       const [hash, filename] = line.split("  ");
       return [filename, hash];
     });
+  console.log(entries);
   return new Map(entries);
 }
 
