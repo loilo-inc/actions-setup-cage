@@ -82,7 +82,9 @@ function getPlatformArch(): string {
   return `${platform}_${arch}`;
 }
 
-async function parseChecksum(file: string): Promise<Map<string, string>> {
+export async function parseChecksum(
+  file: string,
+): Promise<Map<string, string>> {
   const buf = await fs.readFile(file, "utf-8");
   const entries: [string, string][] = buf
     .split("\n")
