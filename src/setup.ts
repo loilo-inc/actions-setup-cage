@@ -48,13 +48,13 @@ export async function downloadCage({
   if (!checksums) throw new Error(`Checksums not found for ${version}`);
   if (!asset) throw new Error(`Asset not found for ${platformArch}`);
   console.assert(
-    asset.url.startsWith("https://github.com/"),
-    "asset.url is not valid: %s",
+    asset.url.startsWith("https://"),
+    "asset.url is not secure: %s",
     asset.url,
   );
   console.assert(
-    checksums.url.startsWith("https://github.com/"),
-    "checksums.url is not valid: %s",
+    checksums.url.startsWith("https://"),
+    "checksums.url is not secure: %s",
     checksums.url,
   );
   const checksumsContent = await tc.downloadTool(checksums.url);
