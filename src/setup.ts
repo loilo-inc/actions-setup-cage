@@ -47,21 +47,23 @@ export async function downloadCage({
   );
   if (!checksums) throw new Error(`Checksums not found for ${version}`);
   if (!asset) throw new Error(`Asset not found for ${platformArch}`);
+  const assetUrl = asset.browser_download_url;
+  const checksumsUrl = checksums.browser_download_url;
   console.assert(
-    asset.url.startsWith("https://"),
+    assetUrl.startsWith("https://"),
     "asset.url is not secure: %s",
-    asset.url,
+    assetUrl,
   );
   console.assert(
-    checksums.url.startsWith("https://"),
-    "checksums.url is not secure: %s",
-    checksums.url,
+    checksumsUrl.startsWith("https://"),
+    "checksumsUrl is not secure: %s",
+    checksumsUrl,
   );
-  const checksumsContent = await tc.downloadTool(checksums.url);
+  const checksumsContent = await tc.downloadTool(checksumsUrl);
   const checksumEntries = await parseChecksum(checksumsContent);
   const hash = checksumEntries.get(asset.name);
   if (!hash) throw new Error(`Checksum not found for ${asset.name}`);
-  const zip = await tc.downloadTool(asset.url);
+  const zip = await tc.downloadTool(assetUrl);
   const zipFile = await fs.open(zip, "r");
   const zipHash = await sha256hashAsync(zipFile.createReadStream());
   if (zipHash !== hash) {
@@ -82,7 +84,9 @@ function getPlatformArch(): string {
   return `${platform}_${arch}`;
 }
 
-async function parseChecksum(file: string): Promise<Map<string, string>> {
+export async function parseChecksum(
+  file: string,
+): Promise<Map<string, string>> {
   const buf = await fs.readFile(file, "utf-8");
   const entries: [string, string][] = buf
     .split("\n")

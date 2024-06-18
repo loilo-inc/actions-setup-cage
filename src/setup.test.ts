@@ -1,5 +1,5 @@
 import nock from "nock";
-import { downloadCage, getLatestVersion } from "./setup";
+import { downloadCage, getLatestVersion, parseChecksum } from "./setup";
 import os from "node:os";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -34,7 +34,7 @@ describe("downloadCage", () => {
   beforeEach(() => {
     const makeAsset = (version: string, name: string) => ({
       name,
-      url: `https://github.com/loilo-inc/canarycage/releases/download/${version}/${name}`,
+      browser_download_url: `https://github.com/loilo-inc/canarycage/releases/download/${version}/${name}`,
     });
     const makeRelease = (tag_name: string) => ({
       tag_name,
@@ -105,5 +105,19 @@ describe("downloadCage", () => {
         version: "0.2.0",
       }),
     ).rejects.toThrow("Checksum mismatch:");
+  });
+});
+
+describe("parseChecksum", () => {
+  test("basic", async () => {
+    const map = await parseChecksum(
+      path.resolve(__dirname, "testdata/0.1.0/canarycage_0.1.0_checksums.txt"),
+    );
+    expect(map.get("canarycage_linux_amd64.zip")).toBe(
+      "e00aeaebd63dc17194891514411426aa50ec51b1095fe85df927106184c71b47",
+    );
+    expect(map.get("canarycage_darwin_arm64.zip")).toBe(
+      "e00aeaebd63dc17194891514411426aa50ec51b1095fe85df927106184c71b47",
+    );
   });
 });
