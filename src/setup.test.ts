@@ -34,7 +34,7 @@ describe("downloadCage", () => {
   beforeEach(() => {
     const makeAsset = (version: string, name: string) => ({
       name,
-      url: `https://github.com/loilo-inc/canarycage/releases/download/${version}/${name}`,
+      browser_download_url: `https://github.com/loilo-inc/canarycage/releases/download/${version}/${name}`,
     });
     const makeRelease = (tag_name: string) => ({
       tag_name,
