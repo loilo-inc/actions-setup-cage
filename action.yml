@@ -8,7 +8,7 @@ inputs:
   cage-version:
     description: "Canarycage version. If no version specified, the latest version will be used automatically."
     required: false
-  use-prelerease:
+  use-pre:
     description: "Whether to use the latest pre-release (RC) version."
     required: false
 runs:

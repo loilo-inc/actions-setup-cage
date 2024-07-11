@@ -32,11 +32,11 @@ If you need to set specified version of cage, add `cage-version` param.
 
 ## Use Prerelease version
 
-If you want to use prerelease (RC) version of cage, add `use-prerelease` param.
+If you want to use prerelease (RC) version of cage, add `use-pre` param.
 
 ```yaml
 - uses: loilo-inc/actions-setup-cage@{version}
   with:
     github-token: ${{ secrets.GITHUB_TOKEN }}
-    use-prerelease: true
+    use-pre: true
 ```
