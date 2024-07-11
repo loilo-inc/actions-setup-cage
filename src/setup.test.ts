@@ -7,18 +7,24 @@ import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
 
 describe("getLatestVersions", () => {
-  test("basic", async () => {
+  const list = [
+    { tag_name: "2.1.0-rc1" }, // pre-release
+    { tag_name: "2.0.0" },
+    { tag_name: "2.0.0-rc1" },
+    { tag_name: "1.0.0" },
+    { tag_name: "0-0" }, // not a valid semver
+  ];
+  test.each([
+    ["basic", false, "2.0.0"],
+    ["pre-release", true, "2.1.0-rc1"],
+  ])("%s", async (title, usePreRelease, exp) => {
     nock("https://api.github.com")
       .matchHeader("accept", "application/vnd.github.v3+json")
       .matchHeader("authorization", "token dummy")
       .get("/repos/loilo-inc/canarycage/releases")
-      .reply(200, [
-        { tag_name: "1.0.0" },
-        { tag_name: "2.0.0" },
-        { tag_name: "0-0" },
-      ]);
-    const latest = await getLatestVersion("dummy");
-    expect(latest).toBe("2.0.0");
+      .reply(200, list);
+    const latest = await getLatestVersion({ token: "dummy", usePreRelease });
+    expect(latest).toBe(exp);
   });
   test("should throw if status is not 200", async () => {
     nock("https://api.github.com")
@@ -26,7 +32,7 @@ describe("getLatestVersions", () => {
       .matchHeader("authorization", "token dummy")
       .get("/repos/loilo-inc/canarycage/releases")
       .reply(500, {});
-    await expect(getLatestVersion("dummy")).rejects.toThrow(Error);
+    await expect(getLatestVersion({ token: "dummy" })).rejects.toThrow(Error);
   });
 });
 

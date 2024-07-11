@@ -13,8 +13,9 @@ function assertInput(name: string): string {
 async function main() {
   try {
     const token = assertInput("github-token");
+    const usePreRelease = core.getInput("use-pre-release") === "true";
     let version = core.getInput("cage-version");
-    const latestVersion = await getLatestVersion(token);
+    const latestVersion = await getLatestVersion({ token, usePreRelease });
     if (!version) {
       version = latestVersion;
       core.info(`No version specified. Using latest version: ${version}`);
