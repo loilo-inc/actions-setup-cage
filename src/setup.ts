@@ -4,20 +4,25 @@ import * as core from "@actions/core";
 import os from "node:os";
 import fs from "node:fs/promises";
 import crypto from "node:crypto";
+import semver from "semver";
 
-export async function getLatestVersion(token: string) {
+export async function getLatestVersion({
+  token,
+  usePreRelease = false,
+}: {
+  token: string;
+  usePreRelease?: boolean;
+}) {
   const res = await getOctokit(token).rest.repos.listReleases({
     owner: "loilo-inc",
     repo: "canarycage",
   });
   if (res.status == 200) {
-    const list = res.data;
-    const regex = /^(\d+)\.(\d+)\.(\d+)$/;
-    const versions = list
-      .map((v) => v.tag_name)
-      .filter((v) => v.match(regex))
-      .sort((a, b) => b.localeCompare(a));
-    return versions[0];
+    const list = res.data
+      .filter((v) => semver.valid(v.tag_name))
+      .filter((v) => usePreRelease || !semver.prerelease(v.tag_name))
+      .sort((a, b) => semver.rcompare(a.tag_name, b.tag_name));
+    return list[0].tag_name;
   } else {
     throw new Error(`Could not fetch versions: status=${res.status}`);
   }

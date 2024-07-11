@@ -1,4 +1,5 @@
 # actions-setup-cage
+
 Github Actions to setup [canarycage](https://github.com/loilo-inc/canarycage)
 
 ## Usage
@@ -16,8 +17,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-
-
 ## Cage Version
 
 By default, if no `cage-version` specified in step parameters, the latest version of cage will be resolved and installed automatically. **This is highly recommended.**
@@ -25,8 +24,19 @@ By default, if no `cage-version` specified in step parameters, the latest versio
 If you need to set specified version of cage, add `cage-version` param.
 
 ```yaml
-      - uses: loilo-inc/actions-setup-cage@{version}
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          cage-version: 3.4.2
+- uses: loilo-inc/actions-setup-cage@{version}
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    cage-version: 3.4.2
+```
+
+## Use Prerelease version
+
+If you want to use prerelease (RC) version of cage, add `use-prerelease` param.
+
+```yaml
+- uses: loilo-inc/actions-setup-cage@{version}
+  with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+    use-prerelease: true
 ```
