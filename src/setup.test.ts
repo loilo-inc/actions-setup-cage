@@ -1,10 +1,14 @@
-import nock from "nock";
 import { downloadCage, getLatestVersion, parseChecksum } from "./setup";
 import os from "node:os";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
+import * as github from "@actions/github";
+
+jest.mock("@actions/github", () => ({
+  getOctokit: jest.fn(),
+}));
 
 describe("getLatestVersions", () => {
   const list = [
@@ -14,25 +18,54 @@ describe("getLatestVersions", () => {
     { tag_name: "1.0.0" },
     { tag_name: "0-0" }, // not a valid semver
   ];
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   test.each([
     ["basic", false, "2.0.0"],
     ["pre-release", true, "2.1.0-rc1"],
   ])("%s", async (title, usePreRelease, exp) => {
-    nock("https://api.github.com")
-      .matchHeader("accept", "application/vnd.github.v3+json")
-      .matchHeader("authorization", "token dummy")
-      .get("/repos/loilo-inc/canarycage/releases")
-      .reply(200, list);
-    const latest = await getLatestVersion({ token: "dummy", usePreRelease });
+    const mockOctokit = {
+      rest: {
+        repos: {
+          listReleases: jest.fn().mockResolvedValue({
+            status: 200,
+            data: list,
+          }),
+        },
+      },
+    };
+    (github.getOctokit as jest.Mock).mockReturnValue(mockOctokit);
+
+    const latest = await getLatestVersion({ token: "fake", usePreRelease });
+
+    expect(mockOctokit.rest.repos.listReleases).toHaveBeenCalledWith({
+      owner: "loilo-inc",
+      repo: "canarycage",
+    });
     expect(latest).toBe(exp);
   });
+
   test("should throw if status is not 200", async () => {
-    nock("https://api.github.com")
-      .matchHeader("accept", "application/vnd.github.v3+json")
-      .matchHeader("authorization", "token dummy")
-      .get("/repos/loilo-inc/canarycage/releases")
-      .reply(500, {});
-    await expect(getLatestVersion({ token: "dummy" })).rejects.toThrow(Error);
+    const mockOctokit = {
+      rest: {
+        repos: {
+          listReleases: jest.fn().mockResolvedValue({
+            status: 500,
+            data: {},
+          }),
+        },
+      },
+    };
+    (github.getOctokit as jest.Mock).mockReturnValue(mockOctokit);
+
+    await expect(getLatestVersion({ token: "fake" })).rejects.toThrow(Error);
+
+    expect(mockOctokit.rest.repos.listReleases).toHaveBeenCalledWith({
+      owner: "loilo-inc",
+      repo: "canarycage",
+    });
   });
 });
 
@@ -42,6 +75,7 @@ describe("downloadCage", () => {
       name,
       browser_download_url: `https://github.com/loilo-inc/canarycage/releases/download/${version}/${name}`,
     });
+
     const makeRelease = (tag_name: string) => ({
       tag_name,
       assets: [
@@ -50,16 +84,24 @@ describe("downloadCage", () => {
         makeAsset(tag_name, `canarycage_${tag_name}_checksums.txt`),
       ],
     });
-    nock("https://api.github.com")
-      .matchHeader("accept", "application/vnd.github.v3+json")
-      .matchHeader("authorization", "token dummy")
-      .get("/repos/loilo-inc/canarycage/releases")
-      .reply(200, [
-        makeRelease("0.2.1-rc1"),
-        makeRelease("0.2.0"),
-        makeRelease("0.1.0"),
-      ]);
+
+    const mockOctokit = {
+      rest: {
+        repos: {
+          listReleases: jest.fn().mockResolvedValue({
+            status: 200,
+            data: [
+              makeRelease("0.2.1-rc1"),
+              makeRelease("0.2.0"),
+              makeRelease("0.1.0"),
+            ],
+          }),
+        },
+      },
+    };
+    (github.getOctokit as jest.Mock).mockReturnValue(mockOctokit);
   });
+
   test("basic", async () => {
     jest.spyOn(tc, "downloadTool").mockImplementation(async (u: string) => {
       const { pathname } = new URL(u);
@@ -77,13 +119,17 @@ describe("downloadCage", () => {
       .mockImplementation(async (file: string) => file);
     jest.spyOn(tc, "cacheDir").mockImplementation(async (dir: string) => dir);
     jest.spyOn(core, "addPath").mockImplementation(() => {});
-    await downloadCage({ token: "dummy", version: "0.2.0" });
+    await downloadCage({ token: "fake", version: "0.2.0" });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   test("should throw if version not found", async () => {
     await expect(
       downloadCage({
-        token: "dummy",
+        token: "fake",
         version: "0.4.0",
       }),
     ).rejects.toThrow("Version 0.4.0 not found");
@@ -107,7 +153,7 @@ describe("downloadCage", () => {
     jest.spyOn(core, "addPath").mockImplementation(() => {});
     await expect(
       downloadCage({
-        token: "dummy",
+        token: "fake",
         version: "0.2.0",
       }),
     ).rejects.toThrow("Checksum mismatch:");
