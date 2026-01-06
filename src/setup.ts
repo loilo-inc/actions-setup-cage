@@ -1,9 +1,9 @@
+import * as core from "@actions/core";
 import { getOctokit } from "@actions/github";
 import * as tc from "@actions/tool-cache";
-import * as core from "@actions/core";
-import os from "node:os";
-import fs from "node:fs/promises";
 import crypto from "node:crypto";
+import fs from "node:fs/promises";
+import os from "node:os";
 import semver from "semver";
 
 export async function getLatestVersion({
@@ -82,7 +82,7 @@ export async function downloadCage({
 
 function getPlatformArch(): string {
   const platform = os.platform();
-  let arch = os.arch();
+  let arch: string = os.arch();
   if (arch === "x64") {
     arch = "amd64";
   }

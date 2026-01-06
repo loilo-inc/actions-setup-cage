@@ -1,14 +1,11 @@
-import { downloadCage, getLatestVersion, parseChecksum } from "./setup";
-import os from "node:os";
-import fs from "node:fs/promises";
-import path from "node:path";
-import * as tc from "@actions/tool-cache";
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-
-jest.mock("@actions/github", () => ({
-  getOctokit: jest.fn(),
-}));
+import * as tc from "@actions/tool-cache";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { downloadCage, getLatestVersion, parseChecksum } from "./setup";
 
 describe("getLatestVersions", () => {
   const list = [
@@ -18,9 +15,6 @@ describe("getLatestVersions", () => {
     { tag_name: "1.0.0" },
     { tag_name: "0-0" }, // not a valid semver
   ];
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
 
   test.each([
     ["basic", false, "2.0.0"],
@@ -29,14 +23,14 @@ describe("getLatestVersions", () => {
     const mockOctokit = {
       rest: {
         repos: {
-          listReleases: jest.fn().mockResolvedValue({
+          listReleases: vi.fn().mockResolvedValue({
             status: 200,
             data: list,
           }),
         },
       },
     };
-    (github.getOctokit as jest.Mock).mockReturnValue(mockOctokit);
+    vi.spyOn(github, "getOctokit").mockReturnValue(mockOctokit as any);
 
     const latest = await getLatestVersion({ token: "fake", usePreRelease });
 
@@ -51,14 +45,14 @@ describe("getLatestVersions", () => {
     const mockOctokit = {
       rest: {
         repos: {
-          listReleases: jest.fn().mockResolvedValue({
+          listReleases: vi.fn().mockResolvedValue({
             status: 500,
             data: {},
           }),
         },
       },
     };
-    (github.getOctokit as jest.Mock).mockReturnValue(mockOctokit);
+    vi.spyOn(github, "getOctokit").mockReturnValue(mockOctokit as any);
 
     await expect(getLatestVersion({ token: "fake" })).rejects.toThrow(Error);
 
@@ -88,7 +82,7 @@ describe("downloadCage", () => {
     const mockOctokit = {
       rest: {
         repos: {
-          listReleases: jest.fn().mockResolvedValue({
+          listReleases: vi.fn().mockResolvedValue({
             status: 200,
             data: [
               makeRelease("0.2.1-rc1"),
@@ -99,11 +93,11 @@ describe("downloadCage", () => {
         },
       },
     };
-    (github.getOctokit as jest.Mock).mockReturnValue(mockOctokit);
+    vi.spyOn(github, "getOctokit").mockReturnValue(mockOctokit as any);
   });
 
   test("basic", async () => {
-    jest.spyOn(tc, "downloadTool").mockImplementation(async (u: string) => {
+    vi.spyOn(tc, "downloadTool").mockImplementation(async (u: string) => {
       const { pathname } = new URL(u);
       const p = pathname.replace(
         "/loilo-inc/canarycage/releases/download/",
@@ -114,16 +108,14 @@ describe("downloadCage", () => {
       await fs.copyFile(path.resolve(__dirname, "testdata", p), dest);
       return dest;
     });
-    jest
-      .spyOn(tc, "extractZip")
-      .mockImplementation(async (file: string) => file);
-    jest.spyOn(tc, "cacheDir").mockImplementation(async (dir: string) => dir);
-    jest.spyOn(core, "addPath").mockImplementation(() => {});
+    vi.spyOn(tc, "extractZip").mockImplementation(async (file: string) => file);
+    vi.spyOn(tc, "cacheDir").mockImplementation(async (dir: string) => dir);
+    vi.spyOn(core, "addPath").mockImplementation(() => {});
     await downloadCage({ token: "fake", version: "0.2.0" });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test("should throw if version not found", async () => {
@@ -135,7 +127,7 @@ describe("downloadCage", () => {
     ).rejects.toThrow("Version 0.4.0 not found");
   });
   test("should throw if checksums not matched", async () => {
-    jest.spyOn(tc, "downloadTool").mockImplementation(async (u: string) => {
+    vi.spyOn(tc, "downloadTool").mockImplementation(async (u: string) => {
       const { pathname } = new URL(u);
       let p = pathname.replace("/loilo-inc/canarycage/releases/download/", "");
       if (p.endsWith("checksums.txt")) {
@@ -146,11 +138,9 @@ describe("downloadCage", () => {
       await fs.copyFile(path.resolve(__dirname, "testdata", p), dest);
       return dest;
     });
-    jest
-      .spyOn(tc, "extractZip")
-      .mockImplementation(async (file: string) => file);
-    jest.spyOn(tc, "cacheDir").mockImplementation(async (dir: string) => dir);
-    jest.spyOn(core, "addPath").mockImplementation(() => {});
+    vi.spyOn(tc, "extractZip").mockImplementation(async (file: string) => file);
+    vi.spyOn(tc, "cacheDir").mockImplementation(async (dir: string) => dir);
+    vi.spyOn(core, "addPath").mockImplementation(() => {});
     await expect(
       downloadCage({
         token: "fake",
