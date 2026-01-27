@@ -13,7 +13,8 @@ export async function getLatestVersion({
   token: string;
   usePreRelease?: boolean;
 }) {
-  const res = await getOctokit(token).rest.repos.listReleases({
+  const gh = getOctokit(token);
+  const res = await gh.rest.repos.listReleases({
     owner: "loilo-inc",
     repo: "canarycage",
   });

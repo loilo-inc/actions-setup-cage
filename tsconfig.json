@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "target": "es2022",
     "outDir": "dist",
     "strict": true,
+    "skipLibCheck": true,
     "esModuleInterop": true
   }
 }

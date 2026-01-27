@@ -1,19 +1,19 @@
 {
   "name": "actions-setup-cage",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "fmt": "prettier --write '**/*.ts'",
     "test": "vitest run"
   },
   "dependencies": {
     "@actions/core": "^2",
-    "@actions/github": "^8",
+    "@actions/github": "^7",
     "@actions/io": "^2",
     "@actions/tool-cache": "^3",
     "semver": "^7.6.2"
   },
   "devDependencies": {
-    "@types/download": "^8",
     "@types/node": "^24",
     "@types/semver": "^7.5.8",
     "@vercel/ncc": "^0",
