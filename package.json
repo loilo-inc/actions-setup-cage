@@ -1,7 +1,6 @@
 {
   "name": "actions-setup-cage",
   "license": "MIT",
-  "type": "module",
   "scripts": {
     "fmt": "prettier --write '**/*.ts'",
     "test": "vitest run"
