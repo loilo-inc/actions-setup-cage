@@ -12,7 +12,7 @@ jobs:
       - name: Check lib
         run: |
           make
-          git diff --exit-code
+          git diff --exit-code lib
       - run: npm testci
       - uses: codecov/codecov-action@v5
         env:
