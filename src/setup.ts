@@ -105,8 +105,8 @@ export async function parseChecksum(
 }
 
 export function findChecksumsIndex(files: string[]): number {
-  const checusumPat = /^canarycage_.*_checksums\.txt$/;
-  return files.findIndex((f) => checusumPat.test(f));
+  const checksumPattern = /^canarycage_.+_checksums\.txt$/;
+  return files.findIndex((f) => checksumPattern.test(f));
 }
 
 async function sha256hashAsync(stream: NodeJS.ReadableStream): Promise<string> {
