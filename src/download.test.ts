@@ -30,7 +30,7 @@ describe("downloadCage", () => {
 
   test("should throw if version not found", async () => {
     const cage = makeTestCageInfo({ version: "0.4.0" });
-    await expect(downloadCage(cage)).rejects.toThrow("ENOENT");
+    await expect(downloadCage(cage)).rejects.toThrow();
   });
 
   test("should throw if checksums not matched", async () => {

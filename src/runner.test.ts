@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as setup from "./download";
+import * as download from "./download";
 import { run } from "./runner";
+import { makeTestCageInfo } from "./testdata/testing";
 import * as type from "./type";
 import * as validator from "./validator";
 
-vi.mock("./setup");
+vi.mock("./download");
 vi.mock("./validator");
 vi.mock("./type");
 
@@ -31,8 +32,15 @@ describe("run", () => {
 
   it("should successfully run with valid inputs and install cage", async () => {
     const mockToken = "test-token";
-    const mockReleases = [{ version: "1.0.0" }] as type.Release[];
-    const mockCage = { version: "1.0.0", url: "test-url" };
+    const mockReleases: type.Release[] = [
+      {
+        tag_name: "1.0.0",
+        assets: [
+          { name: "cage-linux_amd64.tar.gz", browser_download_url: "url" },
+        ],
+      },
+    ];
+    const mockCage = makeTestCageInfo({ version: "1.0.0" });
 
     mockCore.getInput.mockImplementation((name: string) => {
       if (name === "github-token") return mockToken;
@@ -44,12 +52,12 @@ describe("run", () => {
     vi.mocked(validator.fetchReleases).mockResolvedValue(mockReleases);
     vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
     vi.mocked(validator.getValidCandidate).mockReturnValue(mockCage);
-    vi.mocked(setup.downloadCage).mockResolvedValue(undefined);
+    vi.mocked(download.downloadCage).mockResolvedValue(undefined);
 
     await run({ core: mockCore, io: mockIO, console: mockLogger });
 
     expect(validator.fetchReleases).toHaveBeenCalledWith(mockToken);
-    expect(setup.downloadCage).toHaveBeenCalledWith(mockCage);
+    expect(download.downloadCage).toHaveBeenCalledWith(mockCage);
     expect(mockCore.info).toHaveBeenCalledWith(
       "No version specified. Using latest version: 1.0.0",
     );
@@ -63,14 +71,13 @@ describe("run", () => {
     mockIO.which.mockResolvedValue("/usr/bin/cage");
     vi.mocked(validator.fetchReleases).mockResolvedValue([]);
     vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue({
-      version: "1.0.0",
-      url: "",
-    });
+    vi.mocked(validator.getValidCandidate).mockReturnValue(
+      makeTestCageInfo({ version: "1.0.0" }),
+    );
 
     await run({ core: mockCore, io: mockIO, console: mockLogger });
 
-    expect(setup.downloadCage).not.toHaveBeenCalled();
+    expect(download.downloadCage).not.toHaveBeenCalled();
   });
 
   it("should warn when newer version is available", async () => {
@@ -82,10 +89,9 @@ describe("run", () => {
     mockIO.which.mockResolvedValue("");
     vi.mocked(validator.fetchReleases).mockResolvedValue([]);
     vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue({
-      version: "2.0.0",
-      url: "",
-    });
+    vi.mocked(validator.getValidCandidate).mockReturnValue(
+      makeTestCageInfo({ version: "2.0.0" }),
+    );
 
     await run({ core: mockCore, io: mockIO, console: mockLogger });
 
@@ -110,7 +116,7 @@ describe("run", () => {
     });
     vi.mocked(validator.fetchReleases).mockResolvedValue([]);
     vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue(null);
+    vi.mocked(validator.getValidCandidate).mockReturnValue(undefined);
 
     await run({ core: mockCore, io: mockIO, console: mockLogger });
 
@@ -127,10 +133,9 @@ describe("run", () => {
     mockIO.which.mockResolvedValue("/usr/bin/cage");
     vi.mocked(validator.fetchReleases).mockResolvedValue([]);
     vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue({
-      version: "1.0.0",
-      url: "",
-    });
+    vi.mocked(validator.getValidCandidate).mockReturnValue(
+      makeTestCageInfo({ version: "1.0.0" }),
+    );
 
     await run({ core: mockCore, io: mockIO, console: mockLogger });
 
