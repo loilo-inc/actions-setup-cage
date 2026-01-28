@@ -48,9 +48,8 @@ export async function downloadCage({
   const asset = release.assets.find(
     (asset) => asset.name === `canarycage_${platformArch}.zip`,
   );
-  const checksums = release.assets.find(
-    (asset) => asset.name === `canarycage_${version}_checksums.txt`,
-  );
+  const checksumsIndex = findChecksumsIndex(release.assets.map((a) => a.name));
+  const checksums = release.assets[checksumsIndex];
   if (!checksums) throw new Error(`Checksums not found for ${version}`);
   if (!asset) throw new Error(`Asset not found for ${platformArch}`);
   const assetUrl = asset.browser_download_url;
@@ -103,6 +102,11 @@ export async function parseChecksum(
       return [filename, hash];
     });
   return new Map(entries);
+}
+
+export function findChecksumsIndex(files: string[]): number {
+  const checusumPat = /^canarycage_.*_checksums\.txt$/;
+  return files.findIndex((f) => checusumPat.test(f));
 }
 
 async function sha256hashAsync(stream: NodeJS.ReadableStream): Promise<string> {
