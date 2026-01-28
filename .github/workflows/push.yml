@@ -13,7 +13,7 @@ jobs:
         run: |
           make
           git diff --exit-code lib
-      - run: npm testci
+      - run: npm run testci
       - uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
