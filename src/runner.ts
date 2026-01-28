@@ -3,8 +3,9 @@ type Core = Pick<_Core, "getInput" | "setFailed" | "info" | "warning">;
 type _IO = typeof import("@actions/io");
 type IO = Pick<_IO, "which">;
 import { downloadCage } from "./download";
+import { fetchReleases } from "./github";
 import { getPlatform } from "./type";
-import { fetchReleases, getValidCandidate } from "./validator";
+import { getValidCandidate } from "./validator";
 
 function assertInput(core: Core, name: string): string {
   const v = core.getInput(name);

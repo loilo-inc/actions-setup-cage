@@ -1,4 +1,3 @@
-import { getOctokit } from "@actions/github";
 import semver from "semver";
 import type { CageInfo, Platform, Release } from "./type";
 
@@ -26,19 +25,6 @@ export function isValidRelease({
     (asset) => asset.name === `canarycage_${platform}.zip`,
   );
   return !!(checksumsAsset && zipAsset);
-}
-
-export async function fetchReleases(token: string): Promise<Release[]> {
-  const gh = getOctokit(token).rest.repos;
-  const releases = await gh.listReleases({
-    owner: "loilo-inc",
-    repo: "canarycage",
-  });
-  if (releases.status == 200) {
-    return releases.data;
-  } else {
-    throw new Error(`Could not fetch versions: status=${releases.status}`);
-  }
 }
 
 export function getValidCandidate({
