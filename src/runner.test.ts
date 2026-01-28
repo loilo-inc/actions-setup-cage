@@ -1,10 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as download from "./download";
-import * as github from "./github";
+import { downloadCage } from "./download";
+import { fetchReleases } from "./github";
 import { run } from "./runner";
 import { makeTestCageInfo } from "./testdata/testing";
-import * as type from "./type";
-import * as validator from "./validator";
+import { getPlatform } from "./type";
+import { getValidCandidate } from "./validator";
+
+vi.mock("./download");
+vi.mock("./validator");
+vi.mock("./type");
+vi.mock("./github");
 
 vi.mock("./download");
 vi.mock("./validator");
@@ -12,137 +17,131 @@ vi.mock("./type");
 vi.mock("./github");
 
 describe("run", () => {
-  let mockCore: any;
-  let mockIO: any;
-  let mockLogger: any;
+  const mockCore = {
+    getInput: vi.fn(),
+    setFailed: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+  };
+
+  const mockIO = {
+    which: vi.fn(),
+  };
 
   beforeEach(() => {
-    mockCore = {
-      getInput: vi.fn(),
-      setFailed: vi.fn(),
-      info: vi.fn(),
-      warning: vi.fn(),
-    };
-    mockIO = {
-      which: vi.fn(),
-    };
-    mockLogger = {
-      error: vi.fn(),
-    };
     vi.clearAllMocks();
   });
 
-  it("should successfully run with valid inputs and install cage", async () => {
-    const mockToken = "test-token";
-    const mockReleases: type.Release[] = [
-      {
-        tag_name: "1.0.0",
-        assets: [
-          { name: "cage-linux_amd64.tar.gz", browser_download_url: "url" },
-        ],
-      },
-    ];
-    const mockCage = makeTestCageInfo({ version: "1.0.0" });
+  it("should throw error when github-token is missing", async () => {
+    mockCore.getInput.mockReturnValue("");
 
-    mockCore.getInput.mockImplementation((name: string) => {
-      if (name === "github-token") return mockToken;
-      if (name === "use-pre") return "false";
-      if (name === "cage-version") return "";
+    await expect(run({ core: mockCore, io: mockIO })).rejects.toThrow(
+      "github-token is required",
+    );
+  });
+
+  it("should download cage when not installed", async () => {
+    const mockCage = makeTestCageInfo({ version: "1.0.0" });
+    mockCore.getInput.mockImplementation((name) => {
+      if (name === "github-token") return "token";
+      if (name === "cage-version") return "1.0.0";
       return "";
     });
+    vi.mocked(fetchReleases).mockResolvedValue([]);
+    vi.mocked(getPlatform).mockReturnValue("linux_amd64");
+    vi.mocked(getValidCandidate).mockReturnValue(mockCage);
     mockIO.which.mockResolvedValue("");
-    vi.mocked(github.fetchReleases).mockResolvedValue(mockReleases);
-    vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue(mockCage);
-    vi.mocked(download.downloadCage).mockResolvedValue(undefined);
 
-    await run({ core: mockCore, io: mockIO, console: mockLogger });
+    await run({ core: mockCore, io: mockIO });
 
-    expect(github.fetchReleases).toHaveBeenCalledWith(mockToken);
-    expect(download.downloadCage).toHaveBeenCalledWith(mockCage);
+    expect(downloadCage).toHaveBeenCalledWith(mockCage);
+  });
+
+  it("should not download cage when already installed", async () => {
+    const mockCage = makeTestCageInfo({ version: "1.0.0" });
+    mockCore.getInput.mockImplementation((name) => {
+      if (name === "github-token") return "token";
+      if (name === "cage-version") return "1.0.0";
+      return "";
+    });
+    vi.mocked(fetchReleases).mockResolvedValue([]);
+    vi.mocked(getPlatform).mockReturnValue("linux_amd64");
+    vi.mocked(getValidCandidate).mockReturnValue(mockCage);
+    mockIO.which.mockResolvedValue("/usr/bin/cage");
+
+    await run({ core: mockCore, io: mockIO });
+
+    expect(downloadCage).not.toHaveBeenCalled();
+  });
+
+  it("should throw error when no valid release found", async () => {
+    mockCore.getInput.mockImplementation((name) => {
+      if (name === "github-token") return "token";
+      return "";
+    });
+    vi.mocked(fetchReleases).mockResolvedValue([]);
+    vi.mocked(getPlatform).mockReturnValue("linux_amd64");
+    vi.mocked(getValidCandidate).mockReturnValue(undefined);
+
+    await expect(run({ core: mockCore, io: mockIO })).rejects.toThrow(
+      "Could not find any valid release",
+    );
+  });
+
+  it("should log info when no version specified", async () => {
+    const mockCage = makeTestCageInfo({ version: "1.0.0" });
+    mockCore.getInput.mockImplementation((name) => {
+      if (name === "github-token") return "token";
+      return "";
+    });
+    vi.mocked(fetchReleases).mockResolvedValue([]);
+    vi.mocked(getPlatform).mockReturnValue("linux_amd64");
+    vi.mocked(getValidCandidate).mockReturnValue(mockCage);
+    mockIO.which.mockResolvedValue("/usr/bin/cage");
+
+    await run({ core: mockCore, io: mockIO });
+
     expect(mockCore.info).toHaveBeenCalledWith(
       "No version specified. Using latest version: 1.0.0",
     );
   });
 
-  it("should not download cage if already installed", async () => {
-    mockCore.getInput.mockImplementation((name: string) => {
-      if (name === "github-token") return "token";
-      return "";
-    });
-    mockIO.which.mockResolvedValue("/usr/bin/cage");
-    vi.mocked(github.fetchReleases).mockResolvedValue([]);
-    vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue(
-      makeTestCageInfo({ version: "1.0.0" }),
-    );
-
-    await run({ core: mockCore, io: mockIO, console: mockLogger });
-
-    expect(download.downloadCage).not.toHaveBeenCalled();
-  });
-
-  it("should warn when newer version is available", async () => {
-    mockCore.getInput.mockImplementation((name: string) => {
+  it("should throw error when specified version not found", async () => {
+    const mockCage = makeTestCageInfo({ version: "2.0.0" });
+    mockCore.getInput.mockImplementation((name) => {
       if (name === "github-token") return "token";
       if (name === "cage-version") return "1.0.0";
       return "";
     });
-    mockIO.which.mockResolvedValue("");
-    vi.mocked(github.fetchReleases).mockResolvedValue([]);
-    vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue(
-      makeTestCageInfo({ version: "2.0.0" }),
-    );
+    vi.mocked(fetchReleases).mockResolvedValue([]);
+    vi.mocked(getPlatform).mockReturnValue("linux_amd64");
+    vi.mocked(getValidCandidate).mockReturnValue(mockCage);
 
-    await run({ core: mockCore, io: mockIO, console: mockLogger });
-
-    expect(mockCore.warning).toHaveBeenCalledWith(
-      "New version of cage found: current=1.0.0, latest=2.0.0",
+    await expect(run({ core: mockCore, io: mockIO })).rejects.toThrow(
+      "Could not find the specified version: 1.0.0, or have invalid assets",
     );
   });
 
-  it("should fail when github-token is missing", async () => {
-    mockCore.getInput.mockReturnValue("");
-
-    await run({ core: mockCore, io: mockIO, console: mockLogger });
-
-    expect(mockLogger.error).toHaveBeenCalled();
-    expect(mockCore.setFailed).toHaveBeenCalledWith("see error above");
-  });
-
-  it("should fail when no valid release is found", async () => {
-    mockCore.getInput.mockImplementation((name: string) => {
-      if (name === "github-token") return "token";
-      return "";
-    });
-    vi.mocked(github.fetchReleases).mockResolvedValue([]);
-    vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue(undefined);
-
-    await run({ core: mockCore, io: mockIO, console: mockLogger });
-
-    expect(mockLogger.error).toHaveBeenCalled();
-    expect(mockCore.setFailed).toHaveBeenCalledWith("see error above");
-  });
-
-  it("should handle use-pre flag", async () => {
-    mockCore.getInput.mockImplementation((name: string) => {
+  it("should pass use-pre-release flag correctly", async () => {
+    const mockCage = makeTestCageInfo({ version: "1.0.0" });
+    mockCore.getInput.mockImplementation((name) => {
       if (name === "github-token") return "token";
       if (name === "use-pre") return "true";
+      if (name === "cage-version") return "1.0.0";
       return "";
     });
+    vi.mocked(fetchReleases).mockResolvedValue([]);
+    vi.mocked(getPlatform).mockReturnValue("linux_amd64");
+    vi.mocked(getValidCandidate).mockReturnValue(mockCage);
     mockIO.which.mockResolvedValue("/usr/bin/cage");
-    vi.mocked(github.fetchReleases).mockResolvedValue([]);
-    vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(validator.getValidCandidate).mockReturnValue(
-      makeTestCageInfo({ version: "1.0.0" }),
-    );
 
-    await run({ core: mockCore, io: mockIO, console: mockLogger });
+    await run({ core: mockCore, io: mockIO });
 
-    expect(validator.getValidCandidate).toHaveBeenCalledWith(
-      expect.objectContaining({ usePreRelease: true }),
-    );
+    expect(getValidCandidate).toHaveBeenCalledWith({
+      releases: [],
+      platform: "linux_amd64",
+      usePreRelease: true,
+      requiredVersion: "1.0.0",
+    });
   });
 });

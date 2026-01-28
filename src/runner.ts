@@ -15,45 +15,30 @@ function assertInput(core: Core, name: string): string {
   return v;
 }
 
-export async function run({
-  core,
-  io,
-  console,
-}: {
-  core: Core;
-  io: IO;
-  console: Console;
-}) {
-  try {
-    const token = assertInput(core, "github-token");
-    const usePreRelease = core.getInput("use-pre") === "true";
-    const releases = await fetchReleases(token);
-    const platform = getPlatform();
-    const requiredVersion = core.getInput("cage-version");
-    const cage = getValidCandidate({
-      releases,
-      platform,
-      usePreRelease,
-      requiredVersion,
-    });
-    if (!cage) {
-      throw new Error("Could not find any valid release");
-    }
-    if (!requiredVersion) {
-      core.info(`No version specified. Using latest version: ${cage.version}`);
-    } else if (requiredVersion !== cage.version) {
-      core.warning(
-        `New version of cage found: current=${requiredVersion}, latest=${cage.version}`,
-      );
-    }
-    const isInstalled = await io.which("cage", false);
-    if (!isInstalled) {
-      await downloadCage(cage);
-    }
-  } catch (e) {
-    if (e instanceof Error) {
-      console.error(e);
-    }
-    core.setFailed("see error above");
+export async function run({ core, io }: { core: Core; io: IO }) {
+  const token = assertInput(core, "github-token");
+  const usePreRelease = core.getInput("use-pre") === "true";
+  const releases = await fetchReleases(token);
+  const platform = getPlatform();
+  const requiredVersion = core.getInput("cage-version");
+  const cage = getValidCandidate({
+    releases,
+    platform,
+    usePreRelease,
+    requiredVersion,
+  });
+  if (!cage) {
+    throw new Error("Could not find any valid release");
+  }
+  if (!requiredVersion) {
+    core.info(`No version specified. Using latest version: ${cage.version}`);
+  } else if (requiredVersion !== cage.version) {
+    throw new Error(
+      `Could not find the specified version: ${requiredVersion}, or have invalid assets`,
+    );
+  }
+  const isInstalled = await io.which("cage", false);
+  if (!isInstalled) {
+    await downloadCage(cage);
   }
 }
