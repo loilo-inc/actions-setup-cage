@@ -5,68 +5,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import {
-  downloadCage,
-  findChecksumsIndex,
-  getLatestVersion,
-  parseChecksum,
-} from "./setup";
-
-describe("getLatestVersions", () => {
-  const list = [
-    { tag_name: "2.1.0-rc1" }, // pre-release
-    { tag_name: "2.0.0" },
-    { tag_name: "2.0.0-rc1" },
-    { tag_name: "1.0.0" },
-    { tag_name: "0-0" }, // not a valid semver
-  ];
-
-  test.each([
-    ["basic", false, "2.0.0"],
-    ["pre-release", true, "2.1.0-rc1"],
-  ])("%s", async (title, usePreRelease, exp) => {
-    const mockOctokit = {
-      rest: {
-        repos: {
-          listReleases: vi.fn().mockResolvedValue({
-            status: 200,
-            data: list,
-          }),
-        },
-      },
-    };
-    vi.spyOn(github, "getOctokit").mockReturnValue(mockOctokit as any);
-
-    const latest = await getLatestVersion({ token: "fake", usePreRelease });
-
-    expect(mockOctokit.rest.repos.listReleases).toHaveBeenCalledWith({
-      owner: "loilo-inc",
-      repo: "canarycage",
-    });
-    expect(latest).toBe(exp);
-  });
-
-  test("should throw if status is not 200", async () => {
-    const mockOctokit = {
-      rest: {
-        repos: {
-          listReleases: vi.fn().mockResolvedValue({
-            status: 500,
-            data: {},
-          }),
-        },
-      },
-    };
-    vi.spyOn(github, "getOctokit").mockReturnValue(mockOctokit as any);
-
-    await expect(getLatestVersion({ token: "fake" })).rejects.toThrow(Error);
-
-    expect(mockOctokit.rest.repos.listReleases).toHaveBeenCalledWith({
-      owner: "loilo-inc",
-      repo: "canarycage",
-    });
-  });
-});
+import { downloadCage } from "./download";
 
 describe("downloadCage", () => {
   beforeEach(() => {
@@ -166,42 +105,5 @@ describe("parseChecksum", () => {
     expect(map.get("canarycage_darwin_arm64.zip")).toBe(
       "e00aeaebd63dc17194891514411426aa50ec51b1095fe85df927106184c71b47",
     );
-  });
-});
-
-describe("findChecksumsIndex", () => {
-  test("should find checksums file", () => {
-    const files = [
-      "canarycage_linux_amd64.zip",
-      "canarycage_darwin_arm64.zip",
-      "canarycage_0.1.0_checksums.txt",
-    ];
-    const index = findChecksumsIndex(files);
-    expect(index).toBe(2);
-  });
-
-  test("should return -1 if checksums file not found", () => {
-    const files = ["canarycage_linux_amd64.zip", "canarycage_darwin_arm64.zip"];
-    const index = findChecksumsIndex(files);
-    expect(index).toBe(-1);
-  });
-
-  test("should match different version patterns", () => {
-    const files = [
-      "canarycage_linux_amd64.zip",
-      "canarycage_v1.2.3-rc1_checksums.txt",
-    ];
-    const index = findChecksumsIndex(files);
-    expect(index).toBe(1);
-  });
-
-  test("should not match incorrect patterns", () => {
-    const files = [
-      "checksums.txt",
-      "canarycage_checksums.txt",
-      "other_file_checksums.txt",
-    ];
-    const index = findChecksumsIndex(files);
-    expect(index).toBe(-1);
   });
 });
