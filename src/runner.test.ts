@@ -31,7 +31,7 @@ describe("run", () => {
 
   it("should successfully run with valid inputs and install cage", async () => {
     const mockToken = "test-token";
-    const mockReleases = [{ version: "1.0.0" }];
+    const mockReleases = [{ version: "1.0.0" }] as type.Release[];
     const mockCage = { version: "1.0.0", url: "test-url" };
 
     mockCore.getInput.mockImplementation((name: string) => {
@@ -46,7 +46,7 @@ describe("run", () => {
     vi.mocked(validator.getValidCandidate).mockReturnValue(mockCage);
     vi.mocked(setup.downloadCage).mockResolvedValue(undefined);
 
-    await run({ core: mockCore, io: mockIO, logger: mockLogger });
+    await run({ core: mockCore, io: mockIO, console: mockLogger });
 
     expect(validator.fetchReleases).toHaveBeenCalledWith(mockToken);
     expect(setup.downloadCage).toHaveBeenCalledWith(mockCage);
@@ -68,7 +68,7 @@ describe("run", () => {
       url: "",
     });
 
-    await run({ core: mockCore, io: mockIO, logger: mockLogger });
+    await run({ core: mockCore, io: mockIO, console: mockLogger });
 
     expect(setup.downloadCage).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe("run", () => {
       url: "",
     });
 
-    await run({ core: mockCore, io: mockIO, logger: mockLogger });
+    await run({ core: mockCore, io: mockIO, console: mockLogger });
 
     expect(mockCore.warning).toHaveBeenCalledWith(
       "New version of cage found: current=1.0.0, latest=2.0.0",
@@ -97,7 +97,7 @@ describe("run", () => {
   it("should fail when github-token is missing", async () => {
     mockCore.getInput.mockReturnValue("");
 
-    await run({ core: mockCore, io: mockIO, logger: mockLogger });
+    await run({ core: mockCore, io: mockIO, console: mockLogger });
 
     expect(mockLogger.error).toHaveBeenCalled();
     expect(mockCore.setFailed).toHaveBeenCalledWith("see error above");
@@ -112,7 +112,7 @@ describe("run", () => {
     vi.mocked(type.getPlatform).mockReturnValue("linux_amd64");
     vi.mocked(validator.getValidCandidate).mockReturnValue(null);
 
-    await run({ core: mockCore, io: mockIO, logger: mockLogger });
+    await run({ core: mockCore, io: mockIO, console: mockLogger });
 
     expect(mockLogger.error).toHaveBeenCalled();
     expect(mockCore.setFailed).toHaveBeenCalledWith("see error above");
@@ -132,7 +132,7 @@ describe("run", () => {
       url: "",
     });
 
-    await run({ core: mockCore, io: mockIO, logger: mockLogger });
+    await run({ core: mockCore, io: mockIO, console: mockLogger });
 
     expect(validator.getValidCandidate).toHaveBeenCalledWith(
       expect.objectContaining({ usePreRelease: true }),

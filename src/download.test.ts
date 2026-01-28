@@ -1,52 +1,18 @@
 import * as core from "@actions/core";
-import * as github from "@actions/github";
 import * as tc from "@actions/tool-cache";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { downloadCage } from "./download";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { downloadCage, parseChecksum } from "./download";
+import { kMockPathfix, makeTestCageInfo } from "./testdata/testing";
 
 describe("downloadCage", () => {
-  beforeEach(() => {
-    const makeAsset = (version: string, name: string) => ({
-      name,
-      browser_download_url: `https://github.com/loilo-inc/canarycage/releases/download/${version}/${name}`,
-    });
-
-    const makeRelease = (tag_name: string) => ({
-      tag_name,
-      assets: [
-        makeAsset(tag_name, "canarycage_linux_amd64.zip"),
-        makeAsset(tag_name, "canarycage_darwin_arm64.zip"),
-        makeAsset(tag_name, `canarycage_${tag_name}_checksums.txt`),
-      ],
-    });
-
-    const mockOctokit = {
-      rest: {
-        repos: {
-          listReleases: vi.fn().mockResolvedValue({
-            status: 200,
-            data: [
-              makeRelease("0.2.1-rc1"),
-              makeRelease("0.2.0"),
-              makeRelease("0.1.0"),
-            ],
-          }),
-        },
-      },
-    };
-    vi.spyOn(github, "getOctokit").mockReturnValue(mockOctokit as any);
-  });
-
   test("basic", async () => {
+    const cage = makeTestCageInfo({ version: "0.2.0" });
     vi.spyOn(tc, "downloadTool").mockImplementation(async (u: string) => {
       const { pathname } = new URL(u);
-      const p = pathname.replace(
-        "/loilo-inc/canarycage/releases/download/",
-        "",
-      );
+      const p = pathname.replace(kMockPathfix, "");
       const tmp = os.tmpdir();
       const dest = path.resolve(tmp, path.basename(p));
       await fs.copyFile(path.resolve(__dirname, "testdata", p), dest);
@@ -55,7 +21,7 @@ describe("downloadCage", () => {
     vi.spyOn(tc, "extractZip").mockImplementation(async (file: string) => file);
     vi.spyOn(tc, "cacheDir").mockImplementation(async (dir: string) => dir);
     vi.spyOn(core, "addPath").mockImplementation(() => {});
-    await downloadCage({ token: "fake", version: "0.2.0" });
+    await downloadCage(cage);
   });
 
   afterEach(() => {
@@ -63,14 +29,12 @@ describe("downloadCage", () => {
   });
 
   test("should throw if version not found", async () => {
-    await expect(
-      downloadCage({
-        token: "fake",
-        version: "0.4.0",
-      }),
-    ).rejects.toThrow("Version 0.4.0 not found");
+    const cage = makeTestCageInfo({ version: "0.4.0" });
+    await expect(downloadCage(cage)).rejects.toThrow("ENOENT");
   });
+
   test("should throw if checksums not matched", async () => {
+    const cage = makeTestCageInfo({ version: "0.2.0" });
     vi.spyOn(tc, "downloadTool").mockImplementation(async (u: string) => {
       const { pathname } = new URL(u);
       let p = pathname.replace("/loilo-inc/canarycage/releases/download/", "");
@@ -85,12 +49,7 @@ describe("downloadCage", () => {
     vi.spyOn(tc, "extractZip").mockImplementation(async (file: string) => file);
     vi.spyOn(tc, "cacheDir").mockImplementation(async (dir: string) => dir);
     vi.spyOn(core, "addPath").mockImplementation(() => {});
-    await expect(
-      downloadCage({
-        token: "fake",
-        version: "0.2.0",
-      }),
-    ).rejects.toThrow("Checksum mismatch:");
+    await expect(downloadCage(cage)).rejects.toThrow("Checksum mismatch:");
   });
 });
 

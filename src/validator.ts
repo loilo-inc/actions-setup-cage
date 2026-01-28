@@ -62,7 +62,11 @@ export function getValidCandidate({
   if (requiredVersion) {
     const exact = list.find((v) => v.tag_name === requiredVersion);
     if (!exact) return;
-    return releaseToCageInfo(exact, exact.id === latest.id, platform);
+    return releaseToCageInfo(
+      exact,
+      exact.tag_name === latest.tag_name,
+      platform,
+    );
   }
   return releaseToCageInfo(latest, true, platform);
 }

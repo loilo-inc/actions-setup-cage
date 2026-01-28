@@ -8,8 +8,13 @@ export type CageInfo = {
   assetName: string;
   isLatest: boolean;
 };
-export type Release =
+type _Release =
   RestEndpointMethodTypes["repos"]["listReleases"]["response"]["data"][0];
+type _Asset =
+  RestEndpointMethodTypes["repos"]["listReleases"]["response"]["data"][0]["assets"][0];
+
+export type Release = Pick<_Release, "tag_name"> & { assets: Asset[] };
+type Asset = Pick<_Asset, "name" | "browser_download_url">;
 
 export function getPlatform(): Platform {
   const platform = os.platform();
