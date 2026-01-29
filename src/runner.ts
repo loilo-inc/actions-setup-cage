@@ -34,7 +34,7 @@ export async function run({ core, io }: { core: Core; io: IO }) {
     core.info(`No version specified. Using latest version: ${cage.version}`);
   } else if (requiredVersion !== cage.version) {
     throw new Error(
-      `Could not find the specified version: ${requiredVersion}, or have invalid assets`,
+      `Could not find the specified version ${requiredVersion} with valid assets for platform ${platform}`,
     );
   }
   const isInstalled = await io.which("cage", false);
