@@ -4,7 +4,7 @@
   "scripts": {
     "fmt": "prettier --write '**/*.ts'",
     "test": "vitest run",
-    "testci": "vitest run --coverage --coverage.provider=v8 --coverage.file=coverage.txt"
+    "testci": "vitest run --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reportsDirectory=coverage"
   },
   "dependencies": {
     "@actions/core": "^2",
