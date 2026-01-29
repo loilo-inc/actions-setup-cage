@@ -27,7 +27,12 @@ export async function downloadCage({
   if (!hash) throw new Error(`Checksum not found for ${assetName}`);
   const zip = await tc.downloadTool(assetUrl);
   const zipFile = await fs.open(zip, "r");
-  const zipHash = await sha256hashAsync(zipFile.createReadStream());
+  let zipHash: string;
+  try {
+    zipHash = await sha256hashAsync(zipFile.createReadStream());
+  } finally {
+    await zipFile.close();
+  }
   if (zipHash !== hash) {
     throw new Error(`Checksum mismatch: expected=${hash}, actual=${zipHash}`);
   }
