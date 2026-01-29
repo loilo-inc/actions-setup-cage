@@ -113,7 +113,7 @@ describe("run", () => {
     vi.mocked(getValidCandidate).mockReturnValue(mockCage);
 
     await expect(run({ core: mockCore, io: mockIO })).rejects.toThrow(
-      "Could not find the specified version: 1.0.0, or have invalid assets",
+      "Could not find the specified version 1.0.0 with valid assets for platform linux_amd64",
     );
   });
 

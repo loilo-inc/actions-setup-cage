@@ -20,7 +20,7 @@ export async function run({ core, io }: { core: Core; io: IO }) {
   const usePreRelease = core.getInput("use-pre") === "true";
   const releases = await fetchReleases(token);
   const platform = getPlatform();
-  const requiredVersion = core.getInput("cage-version");
+  const requiredVersion = core.getInput("cage-version") || undefined;
   const cage = getValidCandidate({
     releases,
     platform,
