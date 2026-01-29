@@ -51,7 +51,12 @@ export async function parseChecksum(
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const [hash, filename] = line.split("  ");
+      const match = line.match(/^(\S+)\s{2,}(.+)$/);
+      if (!match) {
+        throw new Error(`Malformed checksum line: "${line}"`);
+      }
+      const hash = match[1];
+      const filename = match[2];
       return [filename, hash];
     });
   return new Map(entries);
