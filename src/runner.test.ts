@@ -11,11 +11,6 @@ vi.mock("./validator");
 vi.mock("./type");
 vi.mock("./github");
 
-vi.mock("./download");
-vi.mock("./validator");
-vi.mock("./type");
-vi.mock("./github");
-
 describe("run", () => {
   const mockCore = {
     getInput: vi.fn(),
