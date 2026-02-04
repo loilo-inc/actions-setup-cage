@@ -7,19 +7,9 @@
     "testci": "vitest run --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reportsDirectory=coverage"
   },
   "dependencies": {
-    "@actions/core": "^2",
-    "@actions/github": "^7",
-    "@actions/io": "^2",
-    "@actions/tool-cache": "^3",
-    "semver": "^7.6.2"
+    "@loilo-inc/actions-cage": "^0.1.4"
   },
   "devDependencies": {
-    "@types/node": "^24",
-    "@types/semver": "^7.5.8",
-    "@vercel/ncc": "^0",
-    "@vitest/coverage-v8": "^4.0.18",
-    "prettier": "^3",
-    "typescript": "^5",
-    "vitest": "^4.0.16"
+    "@vercel/ncc": "^0"
   }
 }
