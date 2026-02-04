@@ -3,7 +3,8 @@
   "license": "MIT",
   "scripts": {
     "fmt": "prettier --write '**/*.ts'",
-    "test": "vitest run"
+    "test": "vitest run",
+    "testci": "vitest run --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reportsDirectory=coverage"
   },
   "dependencies": {
     "@actions/core": "^2",
@@ -16,6 +17,7 @@
     "@types/node": "^24",
     "@types/semver": "^7.5.8",
     "@vercel/ncc": "^0",
+    "@vitest/coverage-v8": "^4.0.18",
     "prettier": "^3",
     "typescript": "^5",
     "vitest": "^4.0.16"
