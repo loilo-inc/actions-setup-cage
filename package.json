@@ -10,6 +10,6 @@
     "@loilo-inc/actions-cage": "^0.1.4"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0"
+    "esbuild": "^0.27.2"
   }
 }
