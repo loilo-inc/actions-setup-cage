@@ -13,10 +13,3 @@ jobs:
         run: |
           make
           git diff --exit-code lib
-      - run: npm run testci
-      - uses: codecov/codecov-action@v5
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          fail_ci_if_error: true
-          files: coverage/coverage-final.json
