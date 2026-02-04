@@ -28,14 +28,10 @@ export async function run({ core, io }: { core: Core; io: IO }) {
     requiredVersion,
   });
   if (!cage) {
-    throw new Error("Could not find any valid release");
+    throw new Error(`Could not find any valid release for ${requiredVersion}`);
   }
   if (!requiredVersion) {
     core.info(`No version specified. Using latest version: ${cage.version}`);
-  } else if (requiredVersion !== cage.version) {
-    throw new Error(
-      `Could not find the specified version ${requiredVersion} with valid assets for platform ${platform}`,
-    );
   }
   const isInstalled = await io.which("cage", false);
   if (!isInstalled) {

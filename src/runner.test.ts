@@ -101,22 +101,6 @@ describe("run", () => {
     );
   });
 
-  it("should throw error when specified version not found", async () => {
-    const mockCage = makeTestCageInfo({ version: "2.0.0" });
-    mockCore.getInput.mockImplementation((name) => {
-      if (name === "github-token") return "token";
-      if (name === "cage-version") return "1.0.0";
-      return "";
-    });
-    vi.mocked(fetchReleases).mockResolvedValue([]);
-    vi.mocked(getPlatform).mockReturnValue("linux_amd64");
-    vi.mocked(getValidCandidate).mockReturnValue(mockCage);
-
-    await expect(run({ core: mockCore, io: mockIO })).rejects.toThrow(
-      "Could not find the specified version 1.0.0 with valid assets for platform linux_amd64",
-    );
-  });
-
   it("should pass use-pre-release flag correctly", async () => {
     const mockCage = makeTestCageInfo({ version: "1.0.0" });
     mockCore.getInput.mockImplementation((name) => {

@@ -258,7 +258,6 @@ describe("getValidCandidate", () => {
     ];
     const result = getValidCandidate({ releases, platform: "linux_amd64" });
     expect(result?.version).toBe("2.0.0");
-    expect(result?.isLatest).toBe(true);
   });
 
   test("returns specific version when requiredVersion matches", () => {
@@ -296,7 +295,6 @@ describe("getValidCandidate", () => {
       requiredVersion: "1.0.0",
     });
     expect(result?.version).toBe("1.0.0");
-    expect(result?.isLatest).toBe(false);
   });
 
   test("returns undefined when requiredVersion does not exist", () => {
@@ -358,7 +356,6 @@ describe("getValidCandidate", () => {
       requiredVersion: "2.0.0",
     });
     expect(result?.version).toBe("2.0.0");
-    expect(result?.isLatest).toBe(true);
   });
 
   test("filters out prereleases when usePreRelease is false", () => {
@@ -489,30 +486,11 @@ describe("releaseToCageInfo", () => {
         },
       ],
     };
-    const result = releaseToCageInfo(release, true, "linux_amd64");
+    const result = releaseToCageInfo(release, "linux_amd64");
     expect(result.version).toBe("1.0.0");
     expect(result.checksumsUrl).toBe("http://example.com/checksums.txt");
     expect(result.assetUrl).toBe("http://example.com/linux.zip");
     expect(result.assetName).toBe("canarycage_linux_amd64.zip");
-    expect(result.isLatest).toBe(true);
-  });
-
-  test("sets isLatest to false when specified", () => {
-    const release: Release = {
-      tag_name: "1.0.0",
-      assets: [
-        {
-          name: "canarycage_1.0.0_checksums.txt",
-          browser_download_url: "http://example.com/checksums.txt",
-        },
-        {
-          name: "canarycage_linux_amd64.zip",
-          browser_download_url: "http://example.com/linux.zip",
-        },
-      ],
-    };
-    const result = releaseToCageInfo(release, false, "linux_amd64");
-    expect(result.isLatest).toBe(false);
   });
 
   test("throws error when checksum asset is missing", () => {
@@ -525,7 +503,7 @@ describe("releaseToCageInfo", () => {
         },
       ],
     };
-    expect(() => releaseToCageInfo(release, true, "linux_amd64")).toThrow(
+    expect(() => releaseToCageInfo(release, "linux_amd64")).toThrow(
       "Invalid release: 1.0.0",
     );
   });
@@ -540,7 +518,7 @@ describe("releaseToCageInfo", () => {
         },
       ],
     };
-    expect(() => releaseToCageInfo(release, true, "linux_amd64")).toThrow(
+    expect(() => releaseToCageInfo(release, "linux_amd64")).toThrow(
       "Invalid release: 1.0.0",
     );
   });
@@ -559,7 +537,7 @@ describe("releaseToCageInfo", () => {
         },
       ],
     };
-    expect(() => releaseToCageInfo(release, true, "linux_amd64")).toThrow(
+    expect(() => releaseToCageInfo(release, "linux_amd64")).toThrow(
       "Invalid release: 1.0.0",
     );
   });
@@ -578,7 +556,7 @@ describe("releaseToCageInfo", () => {
         },
       ],
     };
-    const result = releaseToCageInfo(release, true, "darwin_arm64");
+    const result = releaseToCageInfo(release, "darwin_arm64");
     expect(result.assetName).toBe("canarycage_darwin_arm64.zip");
     expect(result.assetUrl).toBe("http://example.com/darwin.zip");
   });

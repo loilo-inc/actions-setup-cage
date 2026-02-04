@@ -6,7 +6,6 @@ export type CageInfo = {
   checksumsUrl: string;
   assetUrl: string;
   assetName: string;
-  isLatest: boolean;
 };
 type _Release =
   RestEndpointMethodTypes["repos"]["listReleases"]["response"]["data"][0];

@@ -8,7 +8,6 @@ export function makeTestCageInfo(
     checksumsUrl: `https://github.com${kMockPathPrefix}${p.version}/canarycage_${p.version}_checksums.txt`,
     assetUrl: `https://github.com${kMockPathPrefix}${p.version}/canarycage_linux_amd64.zip`,
     assetName: `canarycage_linux_amd64.zip`,
-    isLatest: false,
     ...p,
   };
 }

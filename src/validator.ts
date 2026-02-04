@@ -46,18 +46,13 @@ export function getValidCandidate({
   if (requiredVersion) {
     const exact = list.find((v) => v.tag_name === requiredVersion);
     if (!exact) return;
-    return releaseToCageInfo(
-      exact,
-      exact.tag_name === latest.tag_name,
-      platform,
-    );
+    return releaseToCageInfo(exact, platform);
   }
-  return releaseToCageInfo(latest, true, platform);
+  return releaseToCageInfo(latest, platform);
 }
 
 export function releaseToCageInfo(
   release: Release,
-  isLatest: boolean,
   platform: Platform,
 ): CageInfo {
   const checksumAsset = release.assets.find((asset) =>
@@ -74,6 +69,5 @@ export function releaseToCageInfo(
     checksumsUrl: checksumAsset.browser_download_url,
     assetUrl: zipAsset.browser_download_url,
     assetName: zipAsset.name,
-    isLatest,
   };
 }
