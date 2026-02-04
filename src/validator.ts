@@ -39,8 +39,6 @@ export function getValidCandidate({
   usePreRelease?: boolean;
 }): CageInfo | undefined {
   const list = releases
-    .filter((v) => semver.valid(v.tag_name))
-    .filter((v) => usePreRelease || !semver.prerelease(v.tag_name))
     .filter((release) => isValidRelease({ release, usePreRelease, platform }))
     .sort((a, b) => semver.rcompare(a.tag_name, b.tag_name));
   const latest = list.at(0);
