@@ -11,16 +11,12 @@ export async function downloadCage({
   version,
 }: CageInfo) {
   console.log("🥚 Installing cage...");
-  console.assert(
-    assetUrl.startsWith("https://"),
-    "asset.url is not secure: %s",
-    assetUrl,
-  );
-  console.assert(
-    checksumsUrl.startsWith("https://"),
-    "checksumsUrl is not secure: %s",
-    checksumsUrl,
-  );
+  if (!assetUrl.startsWith("https://")) {
+    throw new Error(`asset.url is not secure: ${assetUrl}`);
+  }
+  if (!checksumsUrl.startsWith("https://")) {
+    throw new Error(`checksumsUrl is not secure: ${checksumsUrl}`);
+  }
   const checksumsContent = await tc.downloadTool(checksumsUrl);
   const checksumEntries = await parseChecksum(checksumsContent);
   const hash = checksumEntries.get(assetName);
