@@ -7,7 +7,7 @@
     "testci": "vitest run --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reportsDirectory=coverage"
   },
   "dependencies": {
-    "@loilo-inc/actions-cage": "^0.1.4"
+    "@loilo-inc/actions-setup-cage": "^0.3.2"
   },
   "devDependencies": {
     "esbuild": "^0.27.2"

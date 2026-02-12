@@ -1,0 +1,52 @@
+name: Receive Actions Cage Release
+on:
+  repository_dispatch:
+    types:
+      - actions-cage-release
+  workflow_dispatch: {}
+jobs:
+  receive:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          node-version: "24"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@loilo-inc"
+      - run: npm ci
+      - run: npm i @loilo-inc/actions-setup-cage
+      - name: Build lib
+        id: build_lib
+        run: |
+          make
+          if git diff --exit-code --quiet package.json; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+          UPGRADED_VERSION=$(npm view @loilo-inc/actions-setup-cage version)
+          echo "upgraded_version=$UPGRADED_VERSION" >> $GITHUB_OUTPUT
+      - name: Generate Token
+        if: steps.build_lib.outputs.has_changes == 'true'
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.LOILO_CI_PUBLIC_REPOSITORY_APP_ID }}
+          private-key: ${{ secrets.LOILO_CI_PUBLIC_REPOSITORY_APP_PRIVATE_KEY }}
+      - name: Create Pull Request
+        if: steps.build_lib.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          commit-message: "chore: bump lib to ${{ steps.build_lib.outputs.upgraded_version }}"
+          title: "chore: bump lib to ${{ steps.build_lib.outputs.upgraded_version }}"
+          body: "Automated PR to update lib from ${{ github.event.client_payload.source }}"
+          branch: bump-lib-${{ steps.build_lib.outputs.upgraded_version }}
