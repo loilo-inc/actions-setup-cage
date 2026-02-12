@@ -26,13 +26,14 @@ jobs:
       - name: Build lib
         id: build_lib
         run: |
+          UPGRADED_VERSION=$(npm view @loilo-inc/actions-setup-cage version)
+          npm i @loilo-inc/actions-setup-cage@"$UPGRADED_VERSION" --save-exact
           make
-          if git diff --exit-code --quiet package.json; then
+          if git diff --exit-code; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
-          UPGRADED_VERSION=$(npm view @loilo-inc/actions-setup-cage version)
           echo "upgraded_version=$UPGRADED_VERSION" >> $GITHUB_OUTPUT
       - name: Generate Token
         if: steps.build_lib.outputs.has_changes == 'true'
