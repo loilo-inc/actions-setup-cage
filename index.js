@@ -1,3 +1,3 @@
-import { setup } from "@loilo-inc/actions-cage";
+import { run } from "@loilo-inc/actions-setup-cage";
 
-setup();
+run();
