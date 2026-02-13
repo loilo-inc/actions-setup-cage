@@ -19,7 +19,7 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           scope: "@loilo-inc"
       - run: npm ci
-      - run: npm i @loilo-inc/actions-setup-cage
+      - run: npm install @loilo-inc/actions-setup-cage@latest --save
       - name: Build lib
         id: build_lib
         run: |
