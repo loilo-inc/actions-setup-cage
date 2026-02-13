@@ -1,8 +1,5 @@
-name: Receive Actions Cage Release
+name: Bump Library
 on:
-  repository_dispatch:
-    types:
-      - actions-cage-release
   workflow_dispatch: {}
 jobs:
   receive:
@@ -48,5 +45,5 @@ jobs:
           token: ${{ steps.generate-token.outputs.token }}
           commit-message: "chore: bump lib to ${{ steps.build_lib.outputs.upgraded_version }}"
           title: "chore: bump lib to ${{ steps.build_lib.outputs.upgraded_version }}"
-          body: "Automated PR to update lib from ${{ github.event.client_payload.source }}"
+          body: "Automated PR to update lib from loilo-inc/actions-cage"
           branch: bump-lib-${{ steps.build_lib.outputs.upgraded_version }}
