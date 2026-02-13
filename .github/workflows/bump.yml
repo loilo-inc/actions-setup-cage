@@ -24,7 +24,7 @@ jobs:
         id: build_lib
         run: |
           make
-          if git diff --exit-code; then
+          if git diff --exit-code --quiet package.json action.yml lib/index.js then
             echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
