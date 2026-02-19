@@ -1,0 +1,6 @@
+# CODEOWNERS file
+# This file defines the code owners for specific files in the repository.
+# Each line is a file pattern followed by one or more owners.
+
+# package.json is owned by the oss-maintainer-js team
+package.json @loilo-inc/oss-maintainer-js
