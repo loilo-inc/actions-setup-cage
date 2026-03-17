@@ -1,15 +1,7 @@
 {
   "name": "actions-setup-cage",
   "license": "MIT",
-  "scripts": {
-    "fmt": "prettier --write '**/*.ts'",
-    "test": "vitest run",
-    "testci": "vitest run --coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reportsDirectory=coverage"
-  },
   "dependencies": {
-    "@loilo-inc/actions-setup-cage": "^0.5.4"
-  },
-  "devDependencies": {
-    "esbuild": "^0.27.3"
+    "@loilo-inc/actions-setup-cage": "^0.5.6"
   }
 }
