@@ -34,7 +34,7 @@ jobs:
       - name: Generate Token
         if: steps.build_lib.outputs.has_changes == 'true'
         id: generate-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.LOILO_CI_PUBLIC_REPOSITORY_APP_ID }}
           private-key: ${{ secrets.LOILO_CI_PUBLIC_REPOSITORY_APP_PRIVATE_KEY }}
